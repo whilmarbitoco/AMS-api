@@ -1,0 +1,41 @@
+User
+- id
+- username
+- email
+- password
+- type # 0: admin, 1: teacher
+
+Admin
+- id
+- userID
+
+Teacher 
+- id
+- userID
+- firstname
+- lastname
+
+Student 
+- id
+- userID
+- firstname
+- lastname
+- lrn
+
+Class 
+- id
+- teacherID
+- subject
+- timeIn
+
+ClassStudent
+- id
+- classID
+- studentID
+
+Attendance
+- id
+- classID
+- Date
+- studentID
+- status # 0: present, 1: absent
