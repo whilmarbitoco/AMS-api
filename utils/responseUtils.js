@@ -14,6 +14,11 @@ async function Created(res, message, created) {
     return res.status(201).json({ message, created })
 }
 
+async function Success(res, message) {
+    return res.status(200).json({ message })
+    
+}
+
 async function authFailed(res, error) {
     return res.status(401).json({ auth: false, error: error })
 }
@@ -28,5 +33,6 @@ module.exports = {
     Ok,
     Created,
     authFailed,
-    badRequest
+    badRequest,
+    Success
 }

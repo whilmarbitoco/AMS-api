@@ -20,7 +20,11 @@ async function validateToken(token) {
         
         } else {
           const user = await db.User.findOne({ where: { email: decoded.email } })          
-          resolve(user)
+          if (user) {
+            resolve(user)
+          } else {
+            resolve(false)
+          }
         }
       });
     });

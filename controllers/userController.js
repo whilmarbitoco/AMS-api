@@ -6,8 +6,7 @@ const {validatePassword, validateEmail, validateUser } = require("../utils/valid
 
 async function index(req, res) {
     const users = await db.User.findAll()
-   
-    res.send(users)
+    res.json(users)
 }
 
 async function login(req, res) {
@@ -29,7 +28,7 @@ async function login(req, res) {
   }
   
   async function signup(req, res) {
-    const { username, password, email } = req.body;
+    const { username, password, email, type } = req.body;
 
     const validateBody = await validateUser(username, email, password)
 
@@ -41,7 +40,15 @@ async function login(req, res) {
   
     const hashed = await bcrypt.hash(password, 10)
   
-    const newUser = await db.User.create({ username, email, password: hashed })
+    let newUser;
+
+    if (type) {
+        newUser = await db.User.create({type, username, email, password: hashed })
+    } else {
+        newUser = await db.User.create({ username, email, password: hashed })
+    }
+    
+    
   
    return Created(res, "User Created", newUser)
   

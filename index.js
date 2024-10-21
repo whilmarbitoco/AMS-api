@@ -13,6 +13,8 @@ const PORT = process.env.PORT || 3500;
 // import routes
 const userRouter = require("./routes/userRoute")
 const teacherRouter = require("./routes/teacherRoute")
+const studentRoute = require("./routes/studentRoute")
+const classRoute = require("./routes/classRoute")
 
 // middleware
 app.use(morgan("dev"))
@@ -24,12 +26,14 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")))
 
 // index route
 app.get("/", (req, res) => {
-    res.send("Whilmar Bitoco")
+    res.send("Magnaga National High School Attendance System Restful API Created by: Whilmar M. Bitoco")
 })
 
 // routes
 app.use("/user", userRouter)
 app.use("/teacher", teacherRouter)
+app.use("/student", studentRoute)
+app.use("/class", classRoute)
 
 // connect to db and start server
 app.listen(PORT, async () => {

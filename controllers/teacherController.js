@@ -1,10 +1,10 @@
 const db = require("../models/")
 const { notFound, Ok, Created, Forbidden } = require("../utils/responseUtils")
-const { validateTeacher } = require("../utils/validateInputUtils")
+const { validateName } = require("../utils/validateInputUtils")
 
 
 async function index(req, res) {
-    const teacher = await db.Teacher.findAll()
+    const teacher = await db.Teacher.findAll({include: db.User})
 
     res.json(teacher)
 }
@@ -13,12 +13,12 @@ async function create(req, res) {
     const { firstname, lastname } = req.body
     const user = req.userToken
 
-    const validateBody = await validateTeacher(firstname, lastname)
+    const validateBody = await validateName(firstname, lastname)
     if (!validateBody) return notFound(res, "Missing parameter")
 
     const checkTeacher = await db.Teacher.findOne({ where: { userID: user.id } })
 
-    if (checkTeacher) return Forbidden(res, "Teacher already exists")
+    if (checkTeacher) return Forbidden(res, "Teacher with that email already exists")
 
     const newTeacher = await db.Teacher.create({ firstname, lastname, userID: user.id })
     
@@ -30,7 +30,7 @@ async function edit(req, res) {
     const { firstname, lastname } = req.body
     const user = req.userToken
 
-    const validateBody = await validateTeacher(firstname, lastname)
+    const validateBody = await validateName(firstname, lastname)
     if (!validateBody) return notFound(res, "Missing parameter")  
         
     const checkTeacher = await db.Teacher.findOne({ where: { userID: user.id } })
