@@ -42,7 +42,30 @@ async function getAll(req, res) {
     return res.json(attendance)
 }
 
+async function attendance(req, res) {
+
+    const { classID } = req.params
+    const { studentID } = req.body
+    const user = req.userToken
+
+    if (!classID) return notFound(res, "Missing classID parameter")
+    if (!studentID) return notFound(res, "Missing studentID parameter")
+    if (user.type != 'teacher') return Forbidden(res, "Only teacher can view attendance")
+
+    const getTeacher = await db.Teacher.findOne({ where: { userID: user.id } })
+    const getClass = await db.Class.findOne({ where: { id: classID, teacherID: getTeacher.id } })
+    if (!getClass) return notFound(res, "Class not found")
+
+    const getStudent = await db.Attendance.findOne({ where: { id: studentID, classID } })
+    if (!getStudent) return notFound(res, "Student not found")
+
+    await getStudent.update({ status: "present" })
+
+    return Ok(res, "Attendance updated")
+}
+
 module.exports = {
     index,
-    getAll
+    getAll,
+    attendance
 }

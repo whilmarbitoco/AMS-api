@@ -1,5 +1,5 @@
 const db = require("../models")
-const { notFound, Created, Forbidden, Success } = require("../utils/responseUtils")
+const { notFound, Created, Forbidden, Success, Ok } = require("../utils/responseUtils")
 const { validateName } = require("../utils/validateInputUtils")
 
 async function index(req, res) {
@@ -68,6 +68,9 @@ async function addStudent(req, res) {
     const getClass = await db.Class.findOne({ where: {id: classID, teacherID: getTeacher.id} })
     if (!getClass) return notFound(res, "Class does not exist")
 
+    const checkStudent = await db.ClassStudent.findOne({ where: {classID: getClass.id, studentID: getStudent.id} })
+    if (checkStudent) return Forbidden(res, "Student already in class")
+
     await db.ClassStudent.create({classID: getClass.id, studentID: getStudent.id})
 
     return Created(res, "Student added to class")
@@ -92,10 +95,37 @@ async function displayClass(req, res) {
     
 }
 
+async function removeStudent(req, res) {
+    const { classID } = req.params
+    const { studentID } = req.body
+    const user = req.userToken // current login teacher
+
+    if (!studentID) return notFound(res, "Missing studentID parameter")
+    if (!classID) return notFound(res, "Missing classID parameter") 
+    if (user.type != 'teacher') return Forbidden(res, "Only teacher can add students to class")
+
+    const getTeacher = await db.Teacher.findOne({ where: {userID: user.id} })
+    if (!getTeacher) return notFound(res, "Teacher does not exist. Please create teacher profile.")
+
+    const getStudent = await db.Student.findOne({ where: {id: studentID} })
+    if (!getStudent) return notFound(res, "Student does not exist")
+    
+    const getClass = await db.Class.findOne({ where: {id: classID, teacherID: getTeacher.id} })
+    if (!getClass) return notFound(res, "Class does not exist")
+
+    const checkStudent = await db.ClassStudent.findOne({ where: {classID: getClass.id, studentID: getStudent.id} })
+    if (!checkStudent) return notFound(res, "Student is not in class")
+    
+    await checkStudent.destroy()
+
+    return Ok(res, "Student deleted")
+}
+
 module.exports = {
     index,
     create,
     edit,
     addStudent,
-    displayClass
+    displayClass,
+    removeStudent
 }
