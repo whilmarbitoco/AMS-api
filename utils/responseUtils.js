@@ -1,30 +1,29 @@
-async function notFound(res, error) {
-    return res.status(404).json({ auth: false, error: error })
+async function notFound(res, message) {
+    return res.status(404).json({ message })
 }
 
-async function Forbidden(res, error) {
-    return res.status(403).json({ error: error })
+async function Forbidden(res, message) {
+    return res.status(403).json({ message })
 }
 
-async function Ok(res, user, auth = false, token = null) {
-    return res.status(200).json({ auth, user, token })
+async function Ok(res, message) {
+    return res.status(200).json({ message })
+}
+
+async function Login(res, user, token) {
+    res.status(200).json({message: "Login Successful", user, token })
 }
 
 async function Created(res, message, created) {
-    return res.status(201).json({ message, created })
+    return res.status(201).json({ message, created})
 }
 
-async function Success(res, message) {
-    return res.status(200).json({ message })
-    
+async function authFailed(res, message) {
+    return res.status(401).json({ message })
 }
 
-async function authFailed(res, error) {
-    return res.status(401).json({ auth: false, error: error })
-}
-
-async function badRequest(res, error) {
-    return res.status(400).json({auth: false, error})
+async function badRequest(res, message) {
+    return res.status(400).json({ message })
 }
 
 module.exports = {
@@ -34,5 +33,5 @@ module.exports = {
     Created,
     authFailed,
     badRequest,
-    Success
+    Login
 }

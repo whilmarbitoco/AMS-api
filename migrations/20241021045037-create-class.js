@@ -13,6 +13,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
+      strand: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
       teacherID: {
         type: Sequelize.INTEGER,
         allowNull: false,

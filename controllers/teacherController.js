@@ -13,12 +13,12 @@ async function create(req, res) {
     const { firstname, lastname } = req.body
     const user = req.userToken
 
-    const validateBody = await validateName(firstname, lastname)
+    const validateBody = await validateName(firstname, lastname, "true")
     if (!validateBody) return notFound(res, "Missing parameter")
 
     const checkTeacher = await db.Teacher.findOne({ where: { userID: user.id } })
 
-    if (checkTeacher) return Forbidden(res, "Teacher with that email already exists")
+    if (checkTeacher) return Forbidden(res, "Teacher with that email already exists. Please edit your profile.")
 
     const newTeacher = await db.Teacher.create({ firstname, lastname, userID: user.id })
     
@@ -38,10 +38,8 @@ async function edit(req, res) {
     if (!checkTeacher) return notFound(res, "Teacher does not have personal information")
 
     const updatedTeacher = await db.Teacher.update({ firstname, lastname }, { where: { userID: user.id } })
-
-    console.log(updatedTeacher);
     
-    return Created(res, "Teacher Updated", "updated")
+    return Created(res, "Teacher Updated", updatedTeacher)
 }
 
 module.exports = {

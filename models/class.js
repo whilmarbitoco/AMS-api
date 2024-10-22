@@ -26,6 +26,10 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id'
       }
     },
+    strand: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
     timeIn: {
       type: DataTypes.TIME,
       allowNull: false

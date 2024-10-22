@@ -1,7 +1,7 @@
 const db = require('../models')
 const bcrypt = require('bcrypt')
-const { notFound, Created, Forbidden, Success } = require('../utils/responseUtils')
-const { validateStudent, validateEditStudent, validateName, validateUsername, validatePassword } = require('../utils/validateInputUtils')
+const { notFound, Created, Forbidden, Success, Ok } = require('../utils/responseUtils')
+const { validateStudent, validateEditStudent, validateName, validateUsername, validatePassword, validateEmail } = require('../utils/validateInputUtils')
 
 
 async function index(req, res) {
@@ -13,20 +13,20 @@ async function index(req, res) {
 
 // create a new student with all the params needed
 async function create(req, res) {
-    const {lrn, firstname, lastname, username, email, password} = req.body
-    const validateBody = await validateStudent(lrn, firstname, lastname, username, email, password)
-
+    const {lrn, strand, firstname, lastname, username, email, password} = req.body
+    const validateBody = await validateStudent(lrn, strand, firstname, lastname, username, email, password)
+    
     if (!validateBody) return notFound(res, 'Missing parameters')
 
-    const checkEmail = await db.User.findOne({where: {email, type: 'student'}}) 
-    if (checkEmail) return Forbidden(res, 'Student with that email already exists')
+    const checkEmail = await db.User.findOne({where: {email}}) 
+    if (checkEmail) return Forbidden(res, 'Email already exists')
 
     const checkLrn = await db.Student.findOne({where: {lrn}})
     if (checkLrn) return Forbidden(res, 'Student with that lrn already exists')
 
     const hashedPassword = await bcrypt.hash(password, 10)  
     const user = await db.User.create({type: 'student', email, username,password: hashedPassword})
-    const student = await db.Student.create({userID: user.id,lrn, firstname, lastname})
+    const student = await db.Student.create({userID: user.id,lrn, firstname, lastname, strand})
 
     return Created(res, "Student created", student) 
 }
@@ -58,7 +58,7 @@ async function edit(req, res) {
 
     await student.update({ firstname, lastname });
 
-    return Success(res, "Student updated");
+    return Created(res, "Student Updated", student)
 }
 
 async function destroy(req, res) {
@@ -67,8 +67,11 @@ async function destroy(req, res) {
     const student = await db.User.findByPk(id)
     if (!student) return notFound(res, 'Student not found')
     
+    const user = await db.User.findOne({where: {id: student.userID}})
+    
+    await user.destroy()
     await student.destroy()
-    return Success(res, 'Student deleted')
+    return Ok(res, 'Student deleted')
 }
 
 

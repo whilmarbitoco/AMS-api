@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt")
 const db = require("../models")
 const { validateToken, generateToken, comparePassword } = require("../utils/tokenUtils")
-const { notFound, Ok, Forbidden, Created, authFailed } = require("../utils/responseUtils")
+const { notFound, Ok, Forbidden, Created, authFailed, Login } = require("../utils/responseUtils")
 const {validatePassword, validateEmail, validateUser } = require("../utils/validateInputUtils")
 
 async function index(req, res) {
@@ -24,7 +24,7 @@ async function login(req, res) {
   
     const jwtToken = await generateToken(user)
     
-    Ok(res, user, true, jwtToken)
+    return Login(res, user, jwtToken)
   }
   
   async function signup(req, res) {
@@ -48,10 +48,7 @@ async function login(req, res) {
         newUser = await db.User.create({ username, email, password: hashed })
     }
     
-    
-  
    return Created(res, "User Created", newUser)
-  
 }
   
 
