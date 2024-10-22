@@ -15,6 +15,7 @@ const userRouter = require("./routes/userRoute")
 const teacherRouter = require("./routes/teacherRoute")
 const studentRoute = require("./routes/studentRoute")
 const classRoute = require("./routes/classRoute")
+const attendance = require("./routes/attendanceRoute")
 
 // middleware
 app.use(morgan("dev"))
@@ -34,6 +35,7 @@ app.use("/user", userRouter)
 app.use("/teacher", teacherRouter)
 app.use("/student", studentRoute)
 app.use("/class", classRoute)
+app.use("/attendance", attendance)
 
 // connect to db and start server
 app.listen(PORT, async () => {

@@ -8,7 +8,7 @@ async function comparePassword(password, userPass) {
 }
 
 async function generateToken(user) {
-    const token = jwt.sign({ email: user.email }, process.env['JWT_TOKEN'])
+    const token = jwt.sign({ email: user.email }, process.env['JWT_TOKEN'], { expiresIn: '2h' })
     return token
 }
 

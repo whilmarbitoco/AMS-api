@@ -1,6 +1,6 @@
 npx sequelize-cli model:generate --name User --attributes email:string,username:string,password:string,type:number
 
-npx sequelize-cli model:generate --name ClassStudent --attributes classID:INTEGER,studentID:INTEGER
+npx sequelize-cli model:generate --name Attendance --attributes classID:INTEGER,studentID:INTEGER,date:DATE,status:STRING
 
 
 npx sequelize-cli db:migrate
