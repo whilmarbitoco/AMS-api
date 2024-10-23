@@ -1,6 +1,8 @@
 const db = require("../models")
 const { get } = require("../routes/attendanceRoute")
 const { notFound, Forbidden, Ok } = require("../utils/responseUtils")
+const { dateNow } = require("../utils/dateUtils")
+const { Sequelize } = require("sequelize")
 
 async function index(req, res) {
     const { classID } = req.body
@@ -18,7 +20,7 @@ async function index(req, res) {
     if (!students) return notFound(res, "Class has no students")
 
     await db.Attendance.bulkCreate(
-        students.map(student => ({ classID: classID, studentID: student.id }))
+        students.map(student => ({ classID: classID, studentID: student.studentID }))
     )
    
     return Ok(res, "Attendance created")
@@ -36,7 +38,31 @@ async function getAll(req, res) {
     const getClass = await db.Class.findOne({ where: { id: classID, teacherID: getTeacher.id } })
     if (!getClass) return notFound(res, "Class not found")
 
-    const attendance = await db.Attendance.findAll({where: {classID: classID}, include: db.Student})
+    const attendance = await db.Attendance.findAll({where: {classID: classID}, include: db.Student,  attributes: [
+        'classID',
+        [Sequelize.fn('strftime', '%Y-%m-%d', Sequelize.col('date')), 'dateString']
+      ]})
+    if (!attendance) return notFound(res, "Attendance not found")
+    
+    return res.json(attendance)
+}
+
+async function getNow(req, res) {
+    const { classID } = req.params
+    const user = req.userToken
+
+    if (!classID) return notFound(res, "Missing classID parameter")
+    if (user.type != 'teacher') return Forbidden(res, "Only teacher can view attendance")
+    
+    const getTeacher = await db.Teacher.findOne({ where: { userID: user.id } })
+
+    const getClass = await db.Class.findOne({ where: { id: classID, teacherID: getTeacher.id } })
+    if (!getClass) return notFound(res, "Class not found")
+
+    const attendance = await db.Attendance.findAll({where: {classID: classID, date: dateNow()}, include: db.Student, attributes: [
+        'classID',
+        [Sequelize.fn('strftime', '%Y-%m-%d', Sequelize.col('date')), 'dateString']
+      ]})
     if (!attendance) return notFound(res, "Attendance not found")
     
     return res.json(attendance)
@@ -56,10 +82,12 @@ async function attendance(req, res) {
     const getClass = await db.Class.findOne({ where: { id: classID, teacherID: getTeacher.id } })
     if (!getClass) return notFound(res, "Class not found")
 
-    const getStudent = await db.Attendance.findOne({ where: { id: studentID, classID } })
-    if (!getStudent) return notFound(res, "Student not found")
+    console.log("Date is => " + dateNow());
+    
+    const getAttendance = await db.Attendance.findOne({ where: { id: studentID, classID, date: dateNow() } })
+    if (!getAttendance) return notFound(res, "No Attendance found. Please create attendance first")
 
-    await getStudent.update({ status: "present" })
+    await getAttendance.update({ status: "present" })
 
     return Ok(res, "Attendance updated")
 }
@@ -67,5 +95,6 @@ async function attendance(req, res) {
 module.exports = {
     index,
     getAll,
-    attendance
+    attendance,
+    getNow
 }
