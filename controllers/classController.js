@@ -1,131 +1,196 @@
-const db = require("../models")
-const { notFound, Created, Forbidden, Success, Ok } = require("../utils/responseUtils")
-const { validateName } = require("../utils/validateInputUtils")
+const db = require("../models");
+const {
+  notFound,
+  Created,
+  Forbidden,
+  Success,
+  Ok,
+} = require("../utils/responseUtils");
+const { validateName } = require("../utils/validateInputUtils");
 
 async function index(req, res) {
-    const classes = await db.Class.findAll()
-    res.json(classes)
+  const classes = await db.Class.findAll();
+  res.json(classes);
 }
 
 async function create(req, res) {
-    const {subject, strand, timeIn} = req.body
+  const { subject, strand, timeIn } = req.body;
 
-    const user = req.userToken // current login teacher
+  const user = req.userToken; // current login teacher
 
-    const valBody = validateName(subject, timeIn, strand)
-    if (!valBody) return notFound(res, "Missing body parameters")
+  const valBody = validateName(subject, timeIn, strand);
+  if (!valBody) return notFound(res, "Missing body parameters");
 
-    if (user.type != 'teacher') return Forbidden(res, "Only teacher can create classes")
-    
-    const getTeacher = await db.Teacher.findOne({ where: {userID: user.id} })
-    if (!getTeacher) return notFound(res, "Teacher does not exist. Please create teacher profile.")
-    
-     await db.Class.create({teacherID: getTeacher.id, subject, timeIn, strand})
-    
-    return Created(res, "Class created")
+  if (user.type != "teacher")
+    return Forbidden(res, "Only teacher can create classes");
+
+  const getTeacher = await db.Teacher.findOne({ where: { userID: user.id } });
+  if (!getTeacher)
+    return notFound(
+      res,
+      "Teacher does not exist. Please create teacher profile."
+    );
+
+  await db.Class.create({ teacherID: getTeacher.id, subject, timeIn, strand });
+
+  return Created(res, "Class created");
+}
+
+async function getClass(req, res) {
+  const user = req.userToken;
+
+  const getTeacher = await db.Teacher.findOne({ where: { userID: user.id } });
+  if (!getTeacher)
+    return notFound(
+      res,
+      "Teacher does not exist. Please create teacher profile."
+    );
+
+  const classes = await db.Class.findAll({
+    where: { teacherID: getTeacher.id },
+  });
+  if (!classes) return notFound(res, "No class found");
+
+  return res.json(classes);
 }
 
 async function edit(req, res) {
-    const {subject, timeIn} = req.body
-    const { id } = req.params
+  const { subject, timeIn } = req.body;
+  const { id } = req.params;
 
-    const user = req.userToken // current login teacher
+  const user = req.userToken; // current login teacher
 
-    const valBody = validateName(subject, timeIn)
-    if (!valBody) return notFound(res, "Missing body parameters")
-    if (!id) return notFound(res, "Missing parameters")
+  const valBody = validateName(subject, timeIn);
+  if (!valBody) return notFound(res, "Missing body parameters");
+  if (!id) return notFound(res, "Missing parameters");
 
-    if (user.type != 'teacher') return Forbidden(res, "Only teacher can create classes")
-    
-    const getTeacher = await db.Teacher.findOne({ where: {userID: user.id} })
-    if (!getTeacher) return notFound(res, "Teacher does not exist. Please create teacher profile.")
+  if (user.type != "teacher")
+    return Forbidden(res, "Only teacher can create classes");
 
-    const getClass = await db.Class.findOne({ where: {id, teacherID: getTeacher.id} })
-    if (!getClass) return notFound(res, "Class does not exist")
+  const getTeacher = await db.Teacher.findOne({ where: { userID: user.id } });
+  if (!getTeacher)
+    return notFound(
+      res,
+      "Teacher does not exist. Please create teacher profile."
+    );
 
-    await getClass.update({subject, timeIn})
+  const getClass = await db.Class.findOne({
+    where: { id, teacherID: getTeacher.id },
+  });
+  if (!getClass) return notFound(res, "Class does not exist");
 
-    return Created(res, "Class updated")
-  
+  await getClass.update({ subject, timeIn });
 
+  return Created(res, "Class updated");
 }
 
 async function addStudent(req, res) {
-    const { classID } = req.params
-    const { studentID } = req.body
-    const user = req.userToken // current login teacher
+  const { classID } = req.params;
+  const { studentID } = req.body;
+  const user = req.userToken; // current login teacher
 
-    if (!studentID) return notFound(res, "Missing studentID parameter")
-    if (!classID) return notFound(res, "Missing classID parameter") 
-    if (user.type != 'teacher') return Forbidden(res, "Only teacher can add students to class")
+  if (!studentID) return notFound(res, "Missing studentID parameter");
+  if (!classID) return notFound(res, "Missing classID parameter");
+  if (user.type != "teacher")
+    return Forbidden(res, "Only teacher can add students to class");
 
-    const getTeacher = await db.Teacher.findOne({ where: {userID: user.id} })
-    if (!getTeacher) return notFound(res, "Teacher does not exist. Please create teacher profile.")
+  const getTeacher = await db.Teacher.findOne({ where: { userID: user.id } });
+  if (!getTeacher)
+    return notFound(
+      res,
+      "Teacher does not exist. Please create teacher profile."
+    );
 
-    const getStudent = await db.Student.findOne({ where: {id: studentID} })
-    if (!getStudent) return notFound(res, "Student does not exist")
-    
-    const getClass = await db.Class.findOne({ where: {id: classID, teacherID: getTeacher.id} })
-    if (!getClass) return notFound(res, "Class does not exist")
+  const getStudent = await db.Student.findOne({ where: { id: studentID } });
+  if (!getStudent) return notFound(res, "Student does not exist");
 
-    const checkStudent = await db.ClassStudent.findOne({ where: {classID: getClass.id, studentID: getStudent.id} })
-    if (checkStudent) return Forbidden(res, "Student already in class")
+  const getClass = await db.Class.findOne({
+    where: { id: classID, teacherID: getTeacher.id },
+  });
+  if (!getClass) return notFound(res, "Class does not exist");
 
-    await db.ClassStudent.create({classID: getClass.id, studentID: getStudent.id})
+  const checkStudent = await db.ClassStudent.findOne({
+    where: { classID: getClass.id, studentID: getStudent.id },
+  });
+  if (checkStudent) return Forbidden(res, "Student already in class");
 
-    return Created(res, "Student added to class")
+  await db.ClassStudent.create({
+    classID: getClass.id,
+    studentID: getStudent.id,
+  });
+
+  return Created(res, "Student added to class");
 }
 
 async function displayClass(req, res) {
-    const { classID } = req.params
-    const user = req.userToken // current login teacher
+  const { classID } = req.params;
+  const user = req.userToken; // current login teacher
 
-    if (!classID) return notFound(res, "Missing classID parameter")
-    if (user.type != 'teacher') return Forbidden(res, "Only teacher can view classes")
+  if (!classID) return notFound(res, "Missing classID parameter");
+  if (user.type != "teacher")
+    return Forbidden(res, "Only teacher can view classes");
 
-    const getTeacher = await db.Teacher.findOne({ where: {userID: user.id} })
-    if (!getTeacher) return notFound(res, "Teacher does not exist. Please create teacher profile.")
-    
-    const getClass = await db.Class.findOne({ where: {id: classID, teacherID: getTeacher.id} })
-    if (!getClass) return notFound(res, "Class does not exist")
+  const getTeacher = await db.Teacher.findOne({ where: { userID: user.id } });
+  if (!getTeacher)
+    return notFound(
+      res,
+      "Teacher does not exist. Please create teacher profile."
+    );
 
-    const students = await db.ClassStudent.findAll({ where: {classID: getClass.id}, include: db.Student})
+  const getClass = await db.Class.findOne({
+    where: { id: classID, teacherID: getTeacher.id },
+  });
+  if (!getClass) return notFound(res, "Class does not exist");
 
-    return res.status(200).json(students);
-    
+  const students = await db.ClassStudent.findAll({
+    where: { classID: getClass.id },
+    include: db.Student,
+  });
+
+  return res.status(200).json(students);
 }
 
 async function removeStudent(req, res) {
-    const { classID } = req.params
-    const { studentID } = req.body
-    const user = req.userToken // current login teacher
+  const { classID } = req.params;
+  const { studentID } = req.body;
+  const user = req.userToken; // current login teacher
 
-    if (!studentID) return notFound(res, "Missing studentID parameter")
-    if (!classID) return notFound(res, "Missing classID parameter") 
-    if (user.type != 'teacher') return Forbidden(res, "Only teacher can add students to class")
+  if (!studentID) return notFound(res, "Missing studentID parameter");
+  if (!classID) return notFound(res, "Missing classID parameter");
+  if (user.type != "teacher")
+    return Forbidden(res, "Only teacher can add students to class");
 
-    const getTeacher = await db.Teacher.findOne({ where: {userID: user.id} })
-    if (!getTeacher) return notFound(res, "Teacher does not exist. Please create teacher profile.")
+  const getTeacher = await db.Teacher.findOne({ where: { userID: user.id } });
+  if (!getTeacher)
+    return notFound(
+      res,
+      "Teacher does not exist. Please create teacher profile."
+    );
 
-    const getStudent = await db.Student.findOne({ where: {id: studentID} })
-    if (!getStudent) return notFound(res, "Student does not exist")
-    
-    const getClass = await db.Class.findOne({ where: {id: classID, teacherID: getTeacher.id} })
-    if (!getClass) return notFound(res, "Class does not exist")
+  const getStudent = await db.Student.findOne({ where: { id: studentID } });
+  if (!getStudent) return notFound(res, "Student does not exist");
 
-    const checkStudent = await db.ClassStudent.findOne({ where: {classID: getClass.id, studentID: getStudent.id} })
-    if (!checkStudent) return notFound(res, "Student is not in class")
-    
-    await checkStudent.destroy()
+  const getClass = await db.Class.findOne({
+    where: { id: classID, teacherID: getTeacher.id },
+  });
+  if (!getClass) return notFound(res, "Class does not exist");
 
-    return Ok(res, "Student deleted")
+  const checkStudent = await db.ClassStudent.findOne({
+    where: { classID: getClass.id, studentID: getStudent.id },
+  });
+  if (!checkStudent) return notFound(res, "Student is not in class");
+
+  await checkStudent.destroy();
+
+  return Ok(res, "Student deleted");
 }
 
 module.exports = {
-    index,
-    create,
-    edit,
-    addStudent,
-    displayClass,
-    removeStudent
-}
+  index,
+  create,
+  edit,
+  addStudent,
+  displayClass,
+  removeStudent,
+  getClass,
+};
