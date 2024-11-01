@@ -67,8 +67,14 @@ async function edit(req, res) {
 
   const checkTeacher = await db.Teacher.findOne({ where: { userID: user.id } });
 
-  if (!checkTeacher)
-    return notFound(res, "Teacher does not have personal information");
+  if (!checkTeacher) {
+    await db.Teacher.create({
+      firstname,
+      lastname,
+      userID: user.id,
+    });
+    return Created(res, "Teacher Updated");
+  }
 
   await checkTeacher.update({ firstname, lastname });
   await user.update({ email, username });

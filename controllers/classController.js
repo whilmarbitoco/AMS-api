@@ -173,6 +173,7 @@ async function removeStudent(req, res) {
   const getClass = await db.Class.findOne({
     where: { id: classID, teacherID: getTeacher.id },
   });
+
   if (!getClass) return notFound(res, "Class does not exist");
 
   const checkStudent = await db.ClassStudent.findOne({
