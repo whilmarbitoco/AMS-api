@@ -1,10 +1,15 @@
-const { index, create, destroy, edit } = require('../controllers/studentController');
+const {
+  index,
+  create,
+  destroy,
+  edit,
+} = require("../controllers/studentController");
+const router = require("express").Router();
+const authenticate = require("../middleware/auth");
 
-const router = require('express').Router();
-
-router.get('/', index)
-router.post("/", create)
-router.delete("/:id", destroy)
-router.put("/:id", edit)
+router.get("/", index);
+router.post("/", authenticate, create);
+router.delete("/:id", authenticate, destroy);
+router.put("/:id", authenticate, edit);
 
 module.exports = router;

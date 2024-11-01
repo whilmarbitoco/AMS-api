@@ -21,6 +21,7 @@
     "express-fileupload": "^1.5.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "mysql2": "^3.11.3",
     "path": "^0.12.7",
     "sequelize": "^6.37.3",
     "sqlite3": "^5.1.7"

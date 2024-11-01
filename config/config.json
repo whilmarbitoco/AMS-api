@@ -1,7 +1,11 @@
 {
   "development": {
-    "dialect": "sqlite",
-    "storage": "./config/database.sqlite3"
+    "dialect": "mysql",
+    "host": "localhost",
+    "username": "wb2c0",
+    "password": "parrot2266",
+    "database": "mnhs_ams",
+    "port": 3306
   },
   "test": {
     "dialect": "sqlite",
