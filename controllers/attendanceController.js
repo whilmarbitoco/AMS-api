@@ -110,12 +110,13 @@ async function attendance(req, res) {
   if (!getClass) return notFound(res, "Class not found");
 
   const getAttendance = await db.Attendance.findOne({
-    where: { id: studentID, classID, date: dateNow() },
+    where: { studentID, classID, date: dateNow() },
   });
+
   if (!getAttendance)
     return notFound(res, "No Attendance found. Please create attendance first");
 
-  await getAttendance.update({ status: "present" });
+  await getAttendance.update({ status: "Present" });
 
   return Ok(res, "Attendance updated");
 }
