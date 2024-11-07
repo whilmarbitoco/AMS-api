@@ -1,10 +1,10 @@
 {
   "development": {
     "dialect": "mysql",
-    "host": "localhost",
-    "username": "wb2c0",
-    "password": "parrot2266",
-    "database": "mnhs_ams",
+    "host": "sql12.freemysqlhosting.net",
+    "username": "sql12743280",
+    "password": "krhMFVa7kx",
+    "database": "sql12743280",
     "port": 3306
   },
   "test": {
