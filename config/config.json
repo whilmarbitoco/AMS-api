@@ -12,7 +12,11 @@
     "storage": ":memory"
   },
   "production": {
-    "dialect": "sqlite",
-    "storage": "./config/database.sqlite3"
+    "dialect": "mysql",
+    "host": "sql12.freemysqlhosting.net",
+    "username": "sql12743280",
+    "password": "krhMFVa7kx",
+    "database": "sql12743280",
+    "port": 3306
   }
 }
