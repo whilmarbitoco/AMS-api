@@ -98,19 +98,27 @@ async function destroy(req, res) {
   const student = await db.Student.findByPk(id);
   if (!student) return notFound(res, "Student not found");
 
-  const classList = await db.ClassStudent.findOne({
+  const classListEntries = await db.ClassStudent.findAll({
     where: { studentID: student.id },
   });
-  const attendance = await db.Attendance.findOne({
+
+  const attendanceEntries = await db.Attendance.findAll({
     where: { studentID: student.id },
   });
+
+  for (const classListEntry of classListEntries) {
+    await classListEntry.destroy();
+  }
+
+  for (const attendanceEntry of attendanceEntries) {
+    await attendanceEntry.destroy();
+  }
 
   const user = await db.User.findOne({ where: { id: student.userID } });
-
-  await classList.destroy();
-  await attendance.destroy();
   await student.destroy();
-  await user.destroy();
+  if (user) {
+    await user.destroy();
+  }
 
   return Ok(res, "Student deleted");
 }
