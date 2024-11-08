@@ -100,8 +100,9 @@ async function destroy(req, res) {
 
   const user = await db.User.findOne({ where: { id: student.userID } });
 
-  await user.destroy();
   await student.destroy();
+  await user.destroy();
+
   return Ok(res, "Student deleted");
 }
 
