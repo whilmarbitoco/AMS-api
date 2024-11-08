@@ -98,14 +98,14 @@ async function destroy(req, res) {
   const student = await db.Student.findByPk(id);
   if (!student) return notFound(res, "Student not found");
 
-  const classStudent = db.ClassStudent.findOne({
+  const classList = db.ClassStudent.findOne({
     where: { id: student.userID },
   });
   const attendance = db.Attendance.findOne({ where: { id: student.userID } });
 
   const user = await db.User.findOne({ where: { id: student.userID } });
 
-  await classStudent.destroy();
+  await classList.destroy();
   await attendance.destroy();
   await student.destroy();
   await user.destroy();
