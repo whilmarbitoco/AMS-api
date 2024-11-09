@@ -70,7 +70,7 @@ async function edit(req, res) {
   const valUsername = await validateUsername(username);
   const valPassword = await validatePassword(password);
 
-  const valName = await validateName(firstname, lastname);
+  const valName = await validateName(firstname, lastname, "true");
   if (!valName) return notFound(res, "Missing body parameters");
 
   const student = await db.Student.findByPk(id);
