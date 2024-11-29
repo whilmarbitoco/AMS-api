@@ -49,6 +49,7 @@ async function getClass(req, res) {
   const classes = await db.Class.findAll({
     where: { teacherID: getTeacher.id },
   });
+
   if (!classes) return notFound(res, "No class found");
 
   return res.json(classes);

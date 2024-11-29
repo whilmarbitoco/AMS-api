@@ -29,8 +29,6 @@ async function index(req, res) {
     where: { classID, date: dateNow() },
   });
 
-  console.log(dateNow());
-
   if (checkAtt) return Forbidden(res, "Class Already has attedance");
 
   await db.Attendance.bulkCreate(
@@ -61,6 +59,14 @@ async function getAll(req, res) {
 
   const attendance = await db.Attendance.findAll({
     where: { classID: classID },
+    attributes: {
+      include: [
+        [
+          Sequelize.fn("strftime", "%Y-%m-%d", Sequelize.col("date")),
+          "formattedDate",
+        ],
+      ],
+    },
     include: db.Student,
   });
 
@@ -85,9 +91,22 @@ async function getNow(req, res) {
   if (!getClass) return notFound(res, "Class not found");
 
   const attendance = await db.Attendance.findAll({
-    where: { classID: classID, date: dateNow() },
+    where: {
+      classID: classID,
+      date: dateNow(),
+    },
+    attributes: {
+      include: [
+        [
+          Sequelize.fn("strftime", "%Y-%m-%d", Sequelize.col("date")),
+          "formattedDate",
+        ],
+      ],
+    },
     include: db.Student,
   });
+  console.log("------------------------------" + attendance);
+
   if (!attendance) return notFound(res, "Attendance not found");
 
   return res.json(attendance);

@@ -1,22 +1,14 @@
 {
   "development": {
-    "dialect": "mysql",
-    "host": "sql12.freemysqlhosting.net",
-    "username": "sql12743280",
-    "password": "krhMFVa7kx",
-    "database": "sql12743280",
-    "port": 3306
+    "dialect": "sqlite",
+    "storage": "./mnhs.sqlite"
   },
   "test": {
     "dialect": "sqlite",
     "storage": ":memory"
   },
   "production": {
-    "dialect": "mysql",
-    "host": "sql12.freemysqlhosting.net",
-    "username": "sql12743280",
-    "password": "krhMFVa7kx",
-    "database": "sql12743280",
-    "port": 3306
+    "dialect": "sqlite",
+    "storage": "./mnhs.sqlite"
   }
 }
